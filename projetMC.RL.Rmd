@@ -1,0 +1,1176 @@
+---
+title: "Projet 2019-2020"
+author: "Rahali Nidhal - Lassoued Meriem"
+date: "Decembre 2019"
+output:
+  html_document:
+    df_print: paged
+  html_notebook: default
+  pdf_document: default
+---
+<b>
+EXERCICE 1:
+<div align="justify"> 
+<u><font color ="blue"> <b>Partie I:Simulations de variables aléatoires</b></font></u>
+<br><font color ="Magenta"><b>Question 1:</font></b> 
+
+Soit $X$ une variable aléatoire réelle qui suit la loi Gumbel de paramètre de position $\displaystyle{\mu\in \ R }$ et d'echelle $\displaystyle{\beta}\in(0,\infty)$, on note $F$ sa fonction de répartition
+
+
+$\displaystyle F(x)= \int_{-\infty}^{x} f(t) \, \mathrm{d}t$ avec $f(x)=\frac{1}{\beta} \exp\{-\exp(- \frac{x-\mu}{\beta})\}\exp(-\frac{x-\mu}{\beta})$
+
+On remarque que :
+<br>$\displaystyle f(x)=g(x)'$&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;avec $\displaystyle g(x)=\exp\{-\exp(- \frac{x-\mu}{\beta})\}$
+<br> Ce qui donne que 
+$\displaystyle F(x)=\left [ g(t)\right ]^x_{-\infty}=g(x)$
+<br>
+<br>Commençons par déterminer l'inverse de la fonction de répartition F: 
+Soit $\displaystyle u\in (0,1).$
+<br> $\displaystyle F(x)=u \iff \exp\{-\exp(-\frac{x-\mu}{\beta})\}=u$ <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$\displaystyle \iff \exp(-\frac{x-\mu}{\beta})=-\log(u)$ <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$\displaystyle \iff -\left( \frac{x-\mu}{\beta}\right)=\log(-\log(u))$ <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$\displaystyle \iff x=\mu-\beta\log(-\log(u))$ 
+
+ <font color="magenta">Ainsi</font>           
+ $\displaystyle F^{-1}(u)=\mu-\beta\log(-\log(u))$
+
+D'aprés <font color="red"> <b>La Méthode de la fonction inverse </b> </font>: Si  X est une variable aléatoire réelle de fonction de répartition $F$ et $\displaystyle U \sim U([0,1])$ , alors $\displaystyle F^{-1}(U)$ est une variable aléatoire suivant la loi de X.
+
+
+<hr>
+
+```{r}
+#La fonction r.gumbel permet de generer un n echantillon d une loi gumbel de parametre 
+#d echelle sca (= 2 par defaut) et de parametre de position loc(=1 par defaut)
+#et ce par la methode de la fonction inverse
+
+r.gumbel <- function(n = 100,loc = 1,sca = 2) {
+  u <- runif(n, 0, 1) #generer un echantillon de taille n de la loi uniforme (0,1)
+  return(loc-sca*log(-log(u)))#appliquer la fonction inverse sur l echantillon precedent
+}
+
+#La fonction q.gumbel permet de calculer la fonction quantile (inverse de la cdf) de la loi gumbel 
+#de parametre d echelle sca (= 2 par defaut) et de parametre de position loc(=1 par defaut)
+#x est le vecteur des points en lesquels la fonction quantile sera evaluee  
+q.gumbel<- function(x,loc=1,sca=2) {
+  return(loc-sca*log(-log(u)))
+}
+
+```
+
+Pour la tester, une methode graphique consiste a utiliser les histogrammes. 
+
+```{r}
+#On fixe la graine
+set.seed(666)
+v<-r.gumbel(100)
+
+hist(v,breaks =20,freq = F,col='grey',
+xlim=c(-5,15),ylim = c(0,0.2),border = 'darkmagenta',
+main='Simulation de la densité f par la méthode de la fonction inverse')
+curve(0.5*exp(-exp(-0.5*(x-1)))*exp(-0.5*(x-1)),
+from = -15,to=15,n=100,add=T,type='l',col='darkblue')
+
+```
+
+
+```{r}
+#La fonction d.gumbel permet de calculer la densite de la loi gumbel de parametre 
+#d echelle sca (= 2 par defaut) et de parametre de position loc(=1 par defaut)
+#x est le vecteur des points en lesquels la densite sera evaluee  
+d.gumbel<-function(x,loc=1,sca=2){
+  return((1/sca)*exp(-exp(-(1/sca)*(x-loc)))*exp(-(1/sca)*(x-loc)))
+}
+
+#La fonction cdf.gumbel permet de calculer la fonction de repartition de la loi gumbel de parametre 
+#d echelle sca (= 2 par defaut) et de parametre de position loc(=1 par defaut)
+#x est le vecteur des points en lesquels la cdf sera evaluee  
+cdf.gumbel<-function(x,loc=1,sca=2){
+  return(exp(-exp(-(1/sca)*(x-loc))))
+}
+
+
+
+p.gumbel<-function(x,loc=1,sca=2){
+  return((1/sca)*exp(-exp(-(1/sca)*(x-loc)))*exp(-(1/sca)*(x-loc)))
+}
+
+```
+
+
+</div>
+<hr>
+
+
+<font color ="Magenta"> <b>Question 2: </font></b> 
+<br><font color ="Magenta"> <b>Question 2/a: </font></b> 
+<br>Montrons que la densité jointe de $\displaystyle ( X_{(1)},X_{(n)})$ s’écrit:
+<br>$\displaystyle f_{1,n}=n(n-1)f(x)f(y)(F(y)-F(x))^{n-1}1\!\!1_{x\leq y}$,
+<br>
+<br><u><font color ="green"><b>1 ère Methode</b> </u></font>:
+<br>
+<br> Notons $F$ La fonction de répartition du couple $\displaystyle ( X_{(1)},X_{(n)})$
+<br> $\displaystyle F(x,y)=P( X_{(1)}\leq x, X_{(n)}\leq y) = 1-P( X_{(1)}\geq x, X_{(n)}\leq y)$
+<br> <u> <b>Si x<y </b></u>
+<br>
+<br> $\displaystyle F(x,y) =1-P(\forall i \in \{1,..,n\} , x\leq X_{(i)}\leq y)$
+<br> $\displaystyle \ \ \ \ \ \ \ \ \ \ \ \ =1-\prod_{k=1}^n (P(x<X\leq y)^n$ Car Les $(X_{i})_{1\leq i \leq n}$ Sont idépendantes et identiquement distribuées.
+<br> La fonction de densité jointe $f$ s'obtient en différentiant la fonction de repartition :
+<br> <center>$\frac{\partial^2}{\partial x y} F(x,y)=f(x,y)$</center>
+<br>
+On a : 
+<br> $\displaystyle \frac{\partial}{\partial y} F(x,y)=-nf(y)(F(y)-F(x))^{n-1}$
+<br>
+<br> $\displaystyle \frac{\partial^2}{\partial x\partial y} F(x,y)=n(n-1)f(x)f(y)(F(y)-F(x))^{n-1}$
+<br>
+<br> Ainsi $\displaystyle f_{1,n}(x,y)=n(n-1)f(x)f(y)(F(y)-F(x))^{n-1}1\!\!1_{x\leq y}$
+<br>
+
+<br><u> <Font color ="green"> <b>2 ème Methode :</u> </b> </font>
+<br>
+
+<br>On sait que  l'échantillon $X$ est indépendant et identiquement  distribué selon une loi de probabilité $f$,  alors la densité jointe des ''n'' statistiques   d'ordre est :
+<br><center>$\displaystyle f_{(1:n)}(x_{(1)},..,x_{(n)})=n!\left(\prod_{i=1}^{n} f(x_{(i)})\right)\  1\!\!1_{x_{(1)}< x_{(2)}<\dots< x_{(n-1)}< x_{(n)}}$ </center>
+<hr>
+<br> <b>En effet :</b>
+<br>
+<br>Il suffit de démontrer que pour toute fonction ''&phi;'' mesurable, bornée et positive ou nulle,
+::<math>
+\begin{align}
+\mathbb{E}\left[\varphi(X_{(1)},X_{(2)},\dots, X_{(n)})\right] & = \ \int_{IR^n} \varphi(x_{(1)},x_{(2)},\dots, x_{(n)})\,n!\ \left(\prod_{i=1}^{n} f(x_{(i)})\right)\  1\!\!1_{x_{(1)}< x_{(2)}<\dots< x_{(n-1)}< x_{(n)}}dx_{(1)}\dots dx_{(n)}.
+\end{align}
+</math>
+Mais, comme les ''X<sub>i</sub>'' sont indépendants et possèdent des densités de probabilité, on a:
+<math>
+\begin{align}
+\mathbb{P}\left(\forall i\neq j,\ X_{i}\neq X_{j}\right) & = 1.
+\end{align}
+</math>
+<br>Par conséquent, presque sûrement,
+<math>
+\begin{align}
+\varphi(X_{(1)},X_{(2)},\dots, X_{(n)}) & = \ \sum_{\sigma\in\mathfrak S_n} \varphi(X_{\sigma(1)},X_{\sigma(2)},\dots, X_{\sigma(n)})\  1\!\!1_{X_{\sigma(1)}< X_{\sigma(2)}<\dots< X_{\sigma(n-1)}< X_{\sigma(n)}}.
+\end{align}
+</math>
+
+<br>Finalement :
+<math>
+\begin{align}
+\mathbb{E}\left[\varphi(X_{\sigma(1)},X_{\sigma(2)},\dots, X_{\sigma(n)})\,1\!\!1_{X_{\sigma(1)}< X_{\sigma(2)}<\dots< X_{\sigma(n)}}\right] & = \  \mathbb{E}\left[\varphi(X_{1},X_{2},\dots, X_{n})\,1\!\!1_{X_{1}< X_{2}<\dots< X_{n}}\right]
+\\
+& = \ \int_{IR^n} \varphi(x_{1},x_{2},\dots, x_{n})\ \left(\prod_{i=1}^{n} f(x_{i})\right)\  1\!\!1_{x_{1}< x_{2}<\dots<  x_{n}}dx_{1}\dots dx_{n},
+\end{align}
+<br></math>
+puisque $\displaystyle (X_{\sigma(1)},X_{\sigma(2)},\dots, X_{\sigma(n)})$ et $\displaystyle(X_{1},X_{2},\dots, X_{n})$ ont même densité $\displaystyle \prod_{i=1}^{n} f(x_{i})$ La linéarité de l'esperance  permet de conclure.
+<hr>
+<br>En Marginalisant le vecteur (ordonné) $\displaystyle(X_{(2)},..,X_{(n-1)})$ C'est à dire en intégrant par rapport à $\displaystyle x_{(2)},..,x_{(n-1)}$ et en utilisant <b>le Théorème de Fubini (ou Tonelli)</b> on a :
+
+<br>$\begin{aligned}f_{1,n}(x_{(1)},x_{(n)})&=n!\int_{IR^{n-2}}\left(\prod_{i=1}^{n} f(x_{(i)})\right)\  1\!\!1_{x_{(1)}< x_{(2)}<\dots< x_{(n-1)}< x_{(n)}}dx_{(2)}..dx_{(n-1)}\\&=n!f(x_{1})f(x_{n})\int_{IR^{n-2}}\left(\prod_{i=2}^{n-1} f(x_{(i)})\right) 1\!\!1_{x_{(1)}< x_{(2)}<\dots< x_{(n-1)}< x_{(n)}}dx_{2}..dx_{n-1}\end{aligned}$
+
+
+<br> <b>D'aprés Fubini/Tonelli</b> :
+<br>$\begin{aligned}f_{1,n}(x_{1},x_{n})&=n!f(x_{1})f(x_{n})\int_{IR} f(x_{(n-1)})\int_{IR} ..f(x_{(3)})\int_{IR} f(x_{(2)})\  1\!\!1_{x_{(1)}< x_{(2)}<\dots< x_{(n-1)}< x_{(n)}}dx_{2}..dx_{n-1}\\&=n!f(x_{1})f(x_{n})1\!\!1_{x_{(1)}\leq x_{(n)}}\int_{x_{1}}^{x_{n-1}}...\int_{x_{1}}^{x_{4}}f(x_{3})\int_{x_{1}}^{x_{3}}f(x_{2})dx_{2}..dx_{n-1}\end{aligned}$
+<br>
+<br> Or $\displaystyle \int_{x_{1}}^{x_{3}}f(x_{2})dx=F(x_{3})-F(x_{1})$
+<br>
+<br> En intégrant de proche en proche on obtient que :
+<br>
+<br> $f_{1,n}(x_{1},x_{n})=n!f(x_{1})f(x_{n})1\!\!1_{x_{(1)}< x_{(n)}}\frac{1}{(n-2)!}(F(x_{n})-F(x_{1}))^{n-2}$
+<br>
+<br> Conlusion : $f_{1,n}(x_{1},x_{n})=n(n-1)f(x_{1})f(x_{n})(F(x_{n})-F(x_{1}))^{(n-2)}1\!\!1_{x_{(1)}< x_{(n)}}$
+
+
+<br><Font color ="Green"><u><b>3 ème Méthode</b></u></font> :
+<br>
+<br> Soient $x,y$ $\in$ IR tq $x<y$ et $dx$ ,$dy$ <u> des variations assez petites</u>  
+<br> $\begin{aligned}P(X_{(1)} \in ]x,x+dx] , X_{(n)} \in ]y ,y+dy])&=P("Exactement\ UN\ des \ X_{i}\  appartient \  à \  ]x,x+dx]","Exactement\ UN \ des \ X_{i}\  appartient\  à \ ]y,y+dy]","Exactement\  (n-2) des\ X_{i}\ appartiennent\ à\ ]x+dx,y]")\end{aligned}$
+<br>
+<br>Or Les $\displaystyle (X_{i})_{1 \leq i\leq n}$ sont iid:
+<br>
+<br> Donc $\displaystyle P(X_{(1)} \in ]x,x+dx] ,X_{(n)}\in ]y,y+dy])=\frac{n!}{(n-2)!}(F(x+dx)-F(x))(F(y+dy)-F(y))(F(y)-F(x+dx))^{n-2}$
+<br>
+<br>Donc $\displaystyle f_{1,n}(x,y)dx\ dy=n(n-1)(F(x+dx)-F(x))(F(y+dy)-F(y))(F(y)-F(x+dx))^{n-2}$
+$\displaystyle \Leftrightarrow f_{1,n}(x,y)= \lim\limits_{dx \rightarrow 0,dy \rightarrow 0} n(n-1)\frac{(F(x+dx)-F(x))}{dx}\frac{(F(y+dy)-F(y))}{dy}(F(y+dy)-F(y))(F(y)-F(x+dx))^{n-2}$
+<br>
+<br>
+<br>Sachant que $F$ est $C^\infty$ On a :
+<br>
+<br> $\lim\limits_{dx \rightarrow 0}\frac{(F(x+dx)-F(x))}{dx}=F'(x)=f(x)$
+<br>
+<br>
+<br> $\lim\limits_{dy \rightarrow 0}\frac{(F(y+dy)-F(y))}{dy}=F'(y)=f(y)$
+<br>
+<br>
+<br>et $\lim\limits_{dx \rightarrow 0}(F(y)-F(x+dx))^{(n-2)}=(F(y)-F(x))^{(n-2)}$
+<br>
+<br> Sachant que le support de la densité étant $1\!\!1_{x\leq y}$ (Car $X_{(1)}<X_{(n)}$P.presque sûrement),
+<br>
+<br> on en déduit que :
+<br>
+<br> $\displaystyle f_{1,n}(x,y)=n(n-1)f(x)f(y)(F(y)-F(x))^{n-1}1\!\!1_{x\leq y}$
+<br>
+<br >
+<br><font color ="Magenta"> <b>Question 2. (b): </font></b> 
+<br> Simulons la densité $f_{1,n}$ dans $IR^2$ par <b> <font color="red"> la méthode de rejet </b> </font> :
+<br> 
+<br> La première étape consiste à trouver une loi de densité $g$ facile à simuler telle que : 
+<br>
+<br>$\forall (x,y) \in IR^2  \ \ \ \ \  \ \ \ \ \ \ \ \ \  \ \ \ \ \ \ \ f_{1,n}(x,y) \leq M g(x,y)$ où $M$ est une constante positive 
+<br>
+<br> Sous cette hypothèse , on sait simuler $f_{1,n}$ avec rejet avec la constante $M$ et la densité $g$ . 
+<br>
+<br> Le critère d'arrêt dans l'algorithme du rejet s'ecrit $T=inf \{ n:\ \ \ U_{n} \leq \frac{f_{1,n}(V_{n})}{Mg(V_{n})}\}$ 
+<br>
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; avec  $V_{n} \sim g \ \ \ \  et \ \ \ \ U_{n}\sim U([0,1])$
+<br>
+<br>
+<br> On a :
+<br>
+<br>$f_{1,n}(x,y)= n(n-1) f_{X}(x) f_{Y}(y) (F(y)-F(x))^{(n-2)}1\!\!1_{x\leq y}$
+<br>
+<br> Or la fonction de répartition est non décroissante ,bijective et appartenant à [0,1]
+<br>
+<br> Donc si $x \leq y \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 0\leq F(y)-F(x) \leq F(y) \leq 1$
+<br> De plus 
+<br>
+<br> On obtient ainsi une majoration de $f_{1,n}$
+<br>
+<br>$f_{1,n}(x,y) \leq n(n-1)f_{X}(x)f_{Y}(y)$
+<br>
+<br>  avec $X$ et $Y$ deux variables aléatoires indépendantes identiquement distribuées suivant la loi de Gumbel($\mu$,$\beta$)
+<br>
+<br> Donc $f_{X}(x) 	\cdot f_{Y}(y)=f_{X}\otimes f_{Y}(x,y)=f_{(X,Y)}(x,y)$.
+<br> 
+<br> Ainsi $f_{1,n}(x,y) \leq n(n-1)f_{X,Y}(x,y)$
+<br>
+<br> Donc $f_{1,n}(x,y) \leq M g(x,y)$  avec $M=n(n-1)$   et   $g(x,y)=f_{X,Y}(x,y)$
+
+```{r}
+#Densite de la loi jointe de Xmin et Xmax
+#x est une matrice de taille n*2 des vecteurs en lesquels cette densite sera evalue
+f.jointe <- function(x,n=100) {
+  y<- n*(n-1)*((cdf.gumbel(x[,2])-cdf.gumbel(x[,1]))^(n-2))*d.gumbel(x[,1])*(d.gumbel(x[,2])) 
+  return(y * (x[, 1] <= x[, 2]))#On n oublie pas l indicatrice 
+}
+
+
+#g est la fonction densite instrumentale
+g<-function(x){
+  return((d.gumbel(x[,1])) * (d.gumbel(x[,2])))
+}
+
+reject.sampling <- function(K,n=100) {
+  M <- n*(n-1)
+  ans <- c()
+  k <- K
+  i <- 0
+  p <- 1
+  while (k > 0) {
+    s <- k%/%p + 1
+    i <- i + s
+    x <- cbind(r.gumbel(s, 1, 2), r.gumbel(s, 1, 2))
+    a.r <- (runif(s) <= (f.jointe(x,n)/(M*g(x))))
+    ans <- rbind(ans, x[which(a.r), ])
+    k <- K - nrow(ans)
+    p <- sum(a.r)/s
+    p <- (p == 0) + p
+  }
+  return(list(S = ans[1:K, ], N = i, p = nrow(ans)/i))
+}
+```
+
+
+<br>Pour verifier la methode de rejet on va utiliser plusieurs methodes.
+<br>
+<br>Tout d'abord, remarquons qu'on peut obtenir des realisations de $\displaystyle ( X_{(1)},X_{(n)})$ directement a partir de la methode de simulation de $f$ faite precedemment et nous evite meme de chercher la loi/densite jointe de $\displaystyle ( X_{(1)},X_{(n)})$, $f_{1,n}$
+<br>
+<br>L'algorithme est le suivant: Simulation de K realisations de $\displaystyle ( X_{(1)},X_{(n)})$
+<br>
+<br><b><u>Etape 1:</b></u>Generer un echantillon de taille $n$ suivant la densite $f$
+<br>
+<br><b><u>Etape 2:</b></u>:Ordonner les realisations obtenues a l'etape 1, ne garder que la plus petite et la plus grande realisation
+<br>
+<br><b><u>Etape 3:</b></u>Repeter Etape1+Etape2 K fois
+Dans R on a le code suivant 
+```{r}
+#La fonction joint.order.sampl(K,n) permet d obtenir un K-echantillon de (X(1),X(n))
+#elle prend en arguments k: la taille de l echantillon a generer et n qui est l indice relatif a la statistique #d ordre 
+joint.order.sampl<-function(K=100,n=100){
+  y<-c()
+  for (i in 1:K){
+    z<-r.gumbel(n)
+    y<-rbind(y,c(min(z),max(z)))
+  }
+  return(y)
+}
+```
+
+L'estimation par noyau est une méthode non-paramétrique d’estimation de la densité de probabilité d’une variable aléatoire.
+En R, On peut utiliser la fonction kde2d de la bibilotheque MASS qui permet a partir d'un échantillon  d’estimer la densité bivariee (d'une variable aleatoire 2-dimensionelle) en tout point du support.
+On peut donc Comparer la methode de rejet avec la methode directe en utilisant 
+
+```{r}
+library(MASS)
+set.seed(999)
+par(mfrow=c(1,2))
+par(mar=c(5,3,2,2))
+K<-100#taille de l echantillon
+
+rr1<-reject.sampling(K)$S #En utilisant reject.sampling on genere un echantillon de taille K de (X(1),X(100))
+
+rr<-joint.order.sampl(K) #En utilisant joint.order.sampl on genere un echantillon de taille K de (X(1),X(100))
+
+rej.kde <- kde2d(rr1[,1], rr1[,2], n = 50) #Estimation a partir d un echantillon generer suivant la methode de rejet par defaut kde2d utilse un noyau gaussien
+no.rej.kde <- kde2d(rr[,1], rr[,2], n = 50) #Estimation a partir d un echantillon generer suivant la methode directe
+```
+
+```{r}
+image(rej.kde)      
+contour(rej.kde, add = TRUE) 
+title(main = "Contours des densites estimees par la methode du noyau", sub="Methode de rejet " , outer = FALSE)
+
+image(no.rej.kde)      
+contour(no.rej.kde, add = TRUE) 
+title(main = "Contours des densites estimees par la methode du noyau", sub=" Methode directe" , outer = FALSE)
+
+```
+
+
+```{r}
+par(mfrow=c(1,1))
+par(mar=c(6,6,3,3))
+persp(rej.kde, phi = 45, theta = 30, shade = .1, border = NA)
+title(main = "Plot 3D des densites estimees par la methode du noyau", sub=" Methode par rejet" , outer = FALSE)
+persp(no.rej.kde, phi = 45, theta = 30, shade = .1, border = NA)
+title(main = "Plot 3D des densites estimees par la methode du noyau", sub=" Methode directe" , outer = FALSE)
+```
+
+
+
+
+```{r}
+library(threejs)
+# 
+x <- no.rej.kde$x; y <- no.rej.kde$y; z <- no.rej.kde$z
+# construire la grille
+xx <- rep(x,times=length(y))
+yy <- rep(y,each=length(x))
+zz <- z; dim(zz) <- NULL
+
+ra <- ceiling(16 * zz/max(zz))
+col <- rainbow(16, 2/3)
+# 
+scatterplot3js(x=xx,y=yy,z=zz,size=0.4,color = col[ra],bg="black",main="3D scatterplot (Nuage de points) representant la densite estimee par la methode du noyau - Methode directe ")
+```
+
+```{r}
+x <- rr[,1]; y <-rr[,2]; 
+z <- outer(x, y,function(x,y) {
+  m<-cbind(x,y)
+  f.jointe(m)});
+# Construct x,y,z coordinates
+xx <- rep(x,times=length(y))
+yy <- rep(y,each=length(x))
+zz <- z; dim(zz) <- NULL
+#  Choix des couleurs
+ra <- ceiling(16 * zz/max(zz))
+col <- rainbow(16, 2/3)
+# 
+scatterplot3js(x=xx,y=yy,z=zz,size=0.4,color = col[ra],bg="black",main="3D scatterplot (Nuage de points) representant la densite theorique calculee en les points de l'echantillon obtenu par La methode directe ")
+```
+```{r}
+x <- rej.kde$x; y <- rej.kde$y; z <- rej.kde$z
+# Construire la grille
+xx <- rep(x,times=length(y))
+yy <- rep(y,each=length(x))
+zz <- z; dim(zz) <- NULL
+# Choix des couleurs
+ra <- ceiling(16 * zz/max(zz))
+col <- rainbow(16, 2/3)
+# 
+scatterplot3js(x=xx,y=yy,z=zz,size=0.4,color = col[ra],bg="black",main="3D scatterplot (Nuage de points) representant la densite estimee par la methode du noyau - Methode par rejet ")
+```
+```{r}
+x <- rr1[,1]; y <-rr1[,2]; 
+z <- outer(x, y,function(x,y) {
+  m<-cbind(x,y)
+  f.jointe(m)});
+# Construct x,y,z coordinates
+xx <- rep(x,times=length(y))
+yy <- rep(y,each=length(x))
+zz <- z; dim(zz) <- NULL
+# Set up color range
+ra <- ceiling(16 * zz/max(zz))
+col <- rainbow(16, 2/3)
+# 3D interactive scatter plot
+scatterplot3js(x=xx,y=yy,z=zz,size=0.4,color = col[ra],bg="black",main="3D scatterplot (Nuage de points) representant la densite theorique calculee en les points de l'echantillon obtenu par rejet ")
+
+```
+
+
+
+
+<hr>
+<br>
+<br> <b> <u>Partie II </b></u> :
+<br>
+<br>
+<br>L’étendue de l’échantillon est définie par $\Delta = X _ { ( n ) } - X _ { ( 1 ) }$
+<br> Dans cette partie on s'interresse à l'estimation de $\delta = E ( \Delta )$. 
+<br>Question 1:
+<br>Question 1.(a). On souhaite estimer $\delta = E ( \Delta )$ suivant la densite f de loi Gumbel($\mu$,$\beta$)
+<br> On commence tout d'abord par la simulation de $\Delta$
+<br>
+<br> L'algorithme  de simulation de $\Delta$ est le suivant:
+<br>Soit K la taille de l'echantillon qu'on desire avoir
+<br>Debut
+<br> <u> <b> Etape 1 </b></u> :
+<br>
+<br>Générer un vecteur aleatoire $(X _ { 1 } ,...,X _ { n })$ où les $X_{i}\ i.i.d \sim Gumbel(\mu,\beta)$ :
+<br> 
+<br> <u> <b> Etape 2</b></u> :
+<br>Ordonner les realisations obtenues a l'etape 1, ne garder que la plus petite $X _ { (1) }$ et la plus grande realisation $X _ { (n) }$.
+<br> <u> <b> Etape 3</b></u> :
+<br> Retrancher $X _ { (1) }$  de $X _ { (n) }$.
+<br> <u> <b> Etape 4</b></u> :
+<br> Repeter consecutivement les Etapes 1+2+3, K fois et ce d'une manière indépendente . 
+<br>Fin
+<br>Le vecteur(/matrice) obtenu(e) par l'algorithme  précédent se note alors:
+<br> $(\Delta_{ 1 },\Delta_{ 2 },..., \Delta_{ K } ) \equiv  (X_{ (n), 1} - X_{ (1),1}, X_{ (n),2} - X_{(1),2 },..., X_{ (n),K } -X_{(1),K} )$
+<br>
+<br> i.e. $(X _ { (n), k} -X _ { (1),k })$ représente la $k$ ème réalisation de $\Delta$
+<br>
+<br> Passons maintenant à l'estimateur de $\delta = E ( \Delta )$ 
+<br>
+<br> Notons $\hat { \delta } = \frac { 1 } { K }\sum _ { k = 1 } ^ { K }  \Delta _ { k }$
+<br> 
+<br> donc $\hat { \delta } = \frac { 1 } {K }\sum _ { k = 1 } ^ { K }  (X _ { (n),k }-X _ { (1),k })$
+<br>
+```{r}
+MC.estim <- function(v, level = 0.95) {
+  n <- length(v) ; value <- cumsum(v)/(1:n);moy=mean(v)
+  s2 <- (cumsum(v^2) - (1:n) * (value)^2)/(0:(n- 1)) ; s2 <- s2/(1:n)
+  s2 <- c(0, s2[-1]) 
+  b.IC <- qnorm(0.5 * (level + 1)) * sqrt(s2)
+  return(data.frame(value = value,val=moy, var = s2,
+                    binf = value - b.IC, bsup = value + b.IC))
+}
+```
+
+```{r}
+#La fonction no.reject  prend pour parametres K la taille de l echantillon de delta qu on veut simuler et n
+no.reject<-function(K,n=100){
+  y<-c()
+  for (i in 1:K){
+    z<-r.gumbel(n)
+    y<-c(y,max(z)-min(z))
+  }
+  return(y)
+}
+
+taille<-100
+del.f.MMC<-MC.estim(no.reject(taille))
+paste("Valeur estimee de delta en utilisant f =",del.f.MMC$val[1])
+paste("Intervalle de confiance a 95% IC=[",del.f.MMC$binf[taille],",",del.f.MMC$bsup[taille],"]")
+library(viridisLite)
+c.pal = viridis(3)
+plot(1:taille, del.f.MMC$value, type = "l", lwd = 2, col = c.pal[3],
+     main = expression(paste("Estimation de E(X(n)-X(1)) a partir de f")), xlab = "n",ylab = "valeur de delta", ylim = c(5, 20))
+lines(del.f.MMC$binf, col = c.pal[2], lwd = 2)
+lines(del.f.MMC$bsup, col = c.pal[2], lwd = 2)
+```
+```{r}
+library(ggplot2)
+#
+plt0<-ggplot(data = del.f.MMC)+
+  geom_line(aes(x=1:length(del.f.MMC$value),y=del.f.MMC$value ),color='darkred',alpha=1)+
+  geom_line(aes(x=1:length(del.f.MMC$value),y=del.f.MMC$binf),color='red',alpha=0.8) +
+  geom_line(aes(x=1:length(del.f.MMC$value),y=del.f.MMC$bsup),color='pink',alpha=0.8)+
+  theme_gray()+
+  labs( x = "Taille de l`echantillon", y = "valeur de delta",
+        title ="Estimation de E(X(n)-X(1)) a partir de f")
+
+plt0
+```
+
+<br>
+<br> $\ Question 1.(b)$
+<br> Maintenant, on s'interresse à l'estimation de $\delta = E ( \Delta )$ en utilisant la densité jointe $f_{1,n}$ de $(X_{(1)},X_{(n)})$
+<br> 
+<br> Par cette méthode on obtient directement des réalisation de $(X_{(1)},X_{(n)})$ , sachant qu'on a déja simuler la densité $f_{1,n}$ par la méthode de rejet .
+<br>
+<br> Ainsi l'estimateur s'écrit :
+<br> $\hat { \delta } = \frac { 1 } { K }\sum _ { k = 1 } ^ { K } H \left( X _ { k } \right)$
+<br>
+<br> Avec $X _ { k }=(X _ { (1), k}, X _ { (n),k })$ et $H(x,y)=y-x$
+<br>
+<br> Donc $\hat { \delta } = \frac { 1 } { K }\sum _ { k = 1 } ^ { K } (X _ { (n),k }-X _ { (1),k })$
+<br>
+
+```{r}
+raj <- reject.sampling(taille)
+raj$N
+raj$p
+t<-raj$S[,2]-raj$S[,1]
+mean(t)
+
+del.f.j.MMC<-MC.estim(t)
+paste("Valeur estimee de delta en utilisant la densite jointe f1,n =",del.f.j.MMC$val[1])
+paste("Intervalle de confiance a 95% IC=[",del.f.j.MMC$binf[taille],",",del.f.j.MMC$bsup[taille],"]")
+plt124<-ggplot(data = del.f.MMC)+
+  geom_line(aes(x=1:length(del.f.j.MMC$value),y=del.f.MMC$value ),color='darkred',alpha=1)+
+  geom_line(aes(x=1:length(del.f.j.MMC$value),y=del.f.MMC$binf),color='red',alpha=0.8) +
+  geom_line(aes(x=1:length(del.f.j.MMC$value),y=del.f.MMC$bsup),color='pink',alpha=0.8)+
+  theme_gray()+
+  labs( x = "Taille de l`echantillon", y = "valeur de delta",
+        title ="Estimation de E(X(n)-X(1)) a partir de f1,n")
+
+plt124
+```
+
+<br> <b><u>Comparaison :</u></b>
+<br>
+<br> L'estimation en utilisant la densite f est nettement plus rapide et efficace que la Méthode d'estimation en utilisant la densite jointe.
+<br> En effet, vue que le nombre d'opérations impliquées dans le calcul de l'estimateur de Monté carlo classique est trop faible par rapport au nombre d'opérations requises pour la simulation suivant les deux densités , comparer l'efficacite des deux méthodes d'estimation (suivant $f$ et suivant  $f_{1,n}$) de $\Delta = X _ { ( n ) } - X _ { ( 1 ) }$ revient à comparer les nombre d'opération effectué pour simuler les densités elles mêmes.
+Or on remarque que la Méthode de Rejet nécéssite en Moyenne ($10^6$) appel aux fon  pour un échantillon de taille K=100 si on prend n=100, celà est due au fait que la probabilité d'accéptation est trop faible (de l'ordre de $10^{-4}$) par contre simuler suivant 
+<br>$Question 2.(a)$
+<br>
+<br> Montrons que si $X$ suit la loi de  Gumbel $(\mu,\beta)$ alors $\ X_{(n)}$ suit la loi Gumbel $(\mu+\beta log(n),\beta)$
+<br>
+<br>$\begin{aligned} \mathbb { P } \left( X { ( n ) } \leq x \right) &\left. = \mathbb { P } \left( X_{i}\leq {x ,\forall i\in(1,..,n} \right) \right) \\ & = \mathbb { P } \left( X _ { 1 } \leq x \right) ^ { n } \\ & = \left( \exp \left\{ - n \exp \left( - \frac { x - \mu } { \beta } \right) \right\} \right) \\&= \left( \exp \left\{ -  \exp \left( - \frac { x - (\mu+\beta log(n)) } { \beta } \right) \right\} \right)\end{aligned}$
+<br>
+<br> Ainsi La fonction des répartition de $X_{n}$ est :
+<br>
+<br> $\ F_{X_{(n)}}(x)= \exp \left\{ -  \exp \left( - \frac { x - (\mu+\beta log(n)) } { \beta } \right) \right\} $
+<br>
+<br> Ainsi $\mathbb { E } \left( X _ { ( n ) } \right) = \mu+\beta\cdot log(n) +  \gamma\cdot\beta= \mu+\beta\cdot (log(n) +  \gamma)$
+<br>ou $\gamma$ est la constante d'Euler-Mascheroni.
+<br> Prenons la fonction $H_{0}$ telle que  $H_{0}(x,y)=y$
+<br>
+<br> On a $m=\mathbb { E } \left( H_{0} \left( X _ { ( 1 ) } , X _ { ( n ) } \right) \right)= \mu+\beta\cdot (log(n) +  \gamma)$ connue (rappelons que $\gamma \approx 0.5772$, en R il suffit d'ecrire -digamma(1) pour l'obtenir)
+<br>
+<br> Appliquons alors la Méthode de la variable de contrôle :
+<br>
+<br> Soit  $X _ { k }=(X _ { (1), k}, X _ { (n),k })$  une suite de variable aléatoires indépendantes identiquement distribuées ;
+<br>
+<br> $H$ une fonction mesurable : $H(x,y)=y-x$
+<br>Pour tout réel $b$ positif :
+<br>
+<br>$\widehat { \delta } _ { K } ( b ) = \frac { 1 } { K } \sum _ { k = 1 } ^ { K } \left[ h \left( \mathbf { X } _ { k } \right) - b \left\{ h _ { 0 } \left( \mathbf { X } _ { k } \right) - m \right\} \right]$
+<br> 
+<br>
+<br> Donc  $\widehat { \delta } _ { K } ( b )= \frac { 1 } { K }\sum _ { k = 1 } ^ { K } \{ (X _ { (n),k }-X _ { (1),k })-b[ \, X _ { (n),k }-(\mu+\beta\cdot (log(n) +  \gamma))] \, \}$
+<br>
+<br> En pratique , on choisit arbitrairement b= 1 vue que la taille de l'échantill si on choisit de siumler suivant la densite jointe, est trop faible.
+```{r}
+#set.seed(666)
+n=100
+taille=100
+joint.order.sampl<-function(K,n=100){#cette fonction permet de generer un echantillon de taille K de (X(1),X(n))
+  y<-c()
+  for (i in 1:K){
+    z<-r.gumbel(n)
+    y<-rbind(y,c(min(z),max(z)))
+  }
+  return(y)
+}
+te<-joint.order.sampl(taille)
+
+control.fun<-function (t){
+  return((t[,2]-t[,1])-(t[,2]-(1+2*(log(n)-digamma(1)))))
+}
+
+del.f.MMC<-MC.estim((te[,2]-te[,1]))
+del.contr=MC.estim(control.fun(te))
+paste("Valeur estimee de delta par MMC classique =",del.f.MMC$val[1])
+paste("Intervalle de confiance a 95% IC=[",del.f.MMC$binf[taille],",",del.f.MMC$bsup[taille],"]")
+paste("Valeur estimee de delta en utilisant la methode de la variable de controle =",del.contr$val[1])
+paste("Intervalle de confiance a 95% IC=[",del.contr$binf[taille],",",del.contr$bsup[taille],"]")
+paste("le ratio var(classique)/var(controle) vaut",del.f.MMC$var[taille]/del.contr$var[taille],"donc la methode de la variable de controle permet de reduire la variance de environ ",floor(del.f.MMC$var[taille]/del.contr$var[taille]),"fois")
+```
+
+<br> Concretement, on voit que par la methode de la variable de controle meme pour un parametre b arbitrairement choisi strictement postif on arrive a reduire enormement la variance.
+
+<br> <b> <font color ="blue"> Partie III</b></font>
+<br>
+<br> $\ Question1.(a)$
+<br>Calculons la fonction de répartition de $V_{(n)}=Max(V_{1},...,V_{n})$
+<br>
+<br> Soit $t \in \mathbb{R} $
+<br>
+<br>$\begin{aligned} F_{V_{(n)}(t)} & = \mathbb { P } \left[ V _ { ( n ) } \leqslant t \right]  \\ & = \mathbb { P } \left[ V _ { i } \leqslant t \ , \forall i \in \{1,..,n \}  \right]   \\ & =  (\mathbb { P } \left( V _ { 1 } \leq t  \right)) ^ { n } \\ & = \left( F _ { V _ { 1 } } ( t ) \right) ^ { n } \end{aligned}$
+<br>
+<br> Or les $(V_{i})_{1 \leq i \leq n }$ Sont indépendantes , identiquement distribués suivant une loi exponentielle de paramètre 2 
+<br>
+<br> Donc $F_{V_{(n)}}(t)=(P(V_{1} \leq t))^n=(1-\exp(-2t))^n 1\!\!1_{t\geq 0}$
+<br> 
+<br> Simulons $V_{n}$ par la méthode de la fonction inverse 
+<br> 
+<br> Soit $x\geq0$
+<br>
+<br> $F_{V(n)}(x) =u$   $\Longleftrightarrow$  $x=-\frac{1}{2}\log(1-u^{\frac{1}{n}})$
+<br>
+<br> Donc $F^{-1}(u)=-\frac{1}{2}\log(1-u^{\frac{1}{n}})$
+<br>
+<br> D'aprés <font color="red"> <b>La Méthode de la fonction inverse </b> </font>: Si  X est une variable aléatoire réelle de fonction de répartition $F$ et$\displaystyle U \sim U(0,1)$ , alors $\displaystyle F^{-1}(U)$ est une variable aléatoire suivant la loi de X.
+<br> 
+<br> Passons maintenant à l'estimation de $p$
+<br>
+<br>$\begin{aligned} p & = \mathbb { E } \left(  1\!\!1_{ V _ { ( n ) }\geq t} \right) \\ & = \mathbb { E } \left( H \left( V _ { ( n ) } \right) \right) \end{aligned}$
+<br>
+<br> Avec $H(x)=1\!\!1_{ x\geq t}$
+<br>
+<br> Ainsi l'estimateur de Monté Carlo Classique s'ecrit : 
+<br> 
+<br>$\begin{aligned}\hat I _ { K }& = \frac { 1 } { K } \sum _ { k = 1 } ^ { K } \mathbb { E } \left( H \left( V _ { ( n) , k } \right) \right)\\&= \frac { 1 } { K } \sum _ { k = 1 } ^ { K } \mathbb { E } \left( 1\!\!1_{  V _ { ( n ) , k }\geq t} \right)\end{aligned}$
+<br>
+```{r}
+#La fonction r.exp.max permet par la methode de la fonction inverse 
+#de simuler un n-echantillon de la variable aleatoire Vmax 
+#
+r.exp.max<-function(K,n=100){
+y<-c()#initialisation d un vecteur vide 
+z<-(runif(K))^(1/n)
+y<-c(-log(1-z)*0.5)  
+return(y)
+}
+
+#Vmax.f est la densite de la loi de Vmax, x est un vecteur de points en lesquels cette densite sera evaluee
+Vmax.f<- function(x,n=1000) {
+  y<- n*dexp(x,rate = 2)*((1-dexp(x,rate=2))^(n-1))
+  return(y * (x >=0 ))
+}
+#La fonction h
+h<-function(x,t=8,n=1000){
+  return(as.numeric(x>=8))
+}
+m<-r.exp.max(1000,100)#echantillon de taille 1000 de (X(1),X(100))
+m1<-r.exp.max(10000000,100)#echantillon de taille 10000000 de (X(1),X(100))
+p.hat.MMC<-MC.estim(as.numeric(m>=8))
+p.hat.MMC1<-MC.estim(as.numeric(m1>=8))
+paste("Pour un echantillon de taille 100 Valeur estimee de p par MMC classique =",p.hat.MMC$val[1])
+paste("Pour un echantillon de taille 10000000 Valeur estimee de p par MMC classique =",p.hat.MMC1$val[1])
+paste("Pour un echantillon de taille 10000000 Intervalle de confiance a 95% IC=[",p.hat.MMC1$binf[taille],",",p.hat.MMC1$bsup[taille],"]")
+library(viridisLite)
+c.pal = viridis(3)
+plot(1:length(p.hat.MMC$value), p.hat.MMC$value, type = "l", lwd = 2, col = c.pal[3],
+     main = expression(paste("p")), xlab = "n",
+     ylim = c(-.01, 0.01))
+lines(p.hat.MMC$binf, col = c.pal[2], lwd = 2)
+lines(p.hat.MMC$bsup, col = c.pal[2], lwd = 2)
+```
+<br>
+<br>
+On constate qu'il est impossible d'obtenir une estimation de p par la methode de Monte Carlo Classique pusiqu'il s'agit d'un evenement rare dans le sens ou il est tres rare d'obtenir des realisations de $V_{(n)}$ dans le domaine specifie(dans notre cas D=$\ [t,\infty) $).La queue de la distribution de $V_{(n)}$ est tres legere.
+C.f. graphe suivant:
+```{r}
+#Vmax.f est la densite de la loi de Vmax, x est un vecteur de points en lesquels cette densite sera evaluee
+Vmax.f<- function(x,n=1000) {
+  y<- n*dexp(x,rate = 2)*((1-dexp(x,rate=2))^(n-1))
+  return(y * (x >=0 ))
+}
+
+df<-data.frame(x=c(-2,10))
+p1 <- ggplot(df,aes(x=x) )+
+  stat_function(fun = Vmax.f) +
+  ggtitle("Plot de la densite de V(n)")+
+  theme_dark()
+p1
+```
+<br>$\ Question 2$
+<br>
+$\ Question 2.(a)$
+<br> $(X)_{n}$ Converge en loi vers $X$ $\Longleftrightarrow$ $F_{n}$ Converge simplement vers $F_{X}(x)$ en tout point de $\mathbb{R}$
+
+<br>Calculons la fonction de répartition de $V_{(n)}-0,5 \log(n)$
+<br>
+<br>$\begin{aligned}F_{V_{n}-0,5 \log(n)}(t)&=P(V_{(n)}-0.5\log(n) \leq \ t)=P(V_{n}\leq \ t+0.5\log(n))\\&=(1-\exp\{-2\ (0,5\log(n)+t)\}) ^n 1\!\!1_{t+0.5\log(n)\geq 0}\\&=(1-\exp\{ -\log(n)\}\exp(-2t))^n 1\!\!1_{t+0.5\log(n)\geq 0}=(1-\frac {\exp(-2t)}{n})^n 1\!\!1_{t\geq -0.5\log(n)}\end{aligned}$
+<br>
+<br> <b> <u> Conclusion</b> </u> : $F_{V_{(n)}-0,5 \log(n)}(t)=(1-\frac {\exp(-2t)}{n})^n 1\!\!1_{t\geq -0.5\log(n)}$
+<br>
+<br> Passons à la limite :
+<br>
+<br> On a  d'une part : $(1-\frac{\exp(-2t)}{n})^n = n\log(1-\frac{\exp(-2t)}{n})$
+<br>
+<br> Or on sait, quand $x$ est proche de 0 , que $\log(1+x)\ \sim x$ 
+<br>
+<br>Donc Lorsque n tend vers$+\infty$ et pour $t$ fixé &nbsp;&nbsp;&nbsp;&nbsp;$\log(1-\frac{\exp (-2t)}{n})\sim -\frac{\exp (-2t)}{n}$
+<br>
+<br> Donc &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;&nbsp;&nbsp;&nbsp;&nbsp;$nlog(1-\frac{\exp (-2t)}{n})\sim -\exp(-2t)$
+<br>
+<br> Ainsi &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$\exp(nlog(1-\frac{\exp (-2t)}{n}))\sim \exp( -\exp(-2t))$
+<br>
+<br> D'autre part : Pour $t \in \mathbb{R}$ fixé :
+<br>
+<br> Comme $\lim\limits_{x \rightarrow +\infty} -\frac{1}{2}\log(n)=-\infty$
+<br>
+<br> Par la definiton de la limite : 
+<br>
+<br> $\exists \  n_{0}$ telle que $\forall \  n \geqslant n_{0}$ : $t\geq -\frac{1}{2}\log(n)$ 
+<br>
+<br> Donc &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$\forall \  n \geqslant n_{0}$:&nbsp;&nbsp;&nbsp;&nbsp;  $1\!\!1_{t\geq -0.5\log(n)}=1$
+<br>
+<br> Ainsi gràce au deux derniers résultat on conclut que 
+<br>
+<br> $F_{V_{n}-0,5 \log(n)}(t)\underset{n\to +\infty}{\longrightarrow}exp( -\exp(-2t))$
+<br> 
+<br> Donc $F_{V_{n}-0,5 \log(n)}(t)\underset{n\to +\infty}{\longrightarrow}F_{X}(t)$ où $X$ suit la loi de Gumbel de paramètres (0,$\frac{1}{2}$)
+<br>
+<br>$ Question2.(b)$
+<br> Estimons p à l'aide de <b> <font color ="red"> La Méthode d'échantillage préférentiel</b> </font>
+<br>Premiere approche:
+<br>
+La loi gumbel apparait donc comme la distribution limite d un processus record $V_{(n)}$  ou les $(V_{i})_{i\in\mathbb{N}}$ sont $i.i.d$ distribues selon une loi exponentielle  ceci est en fait un cas particulier du theoreme de Fisher–Tippett–Gnedenko dans la theorie des lois d'extrémum généralisées qui est une famille de lois de probabilité continues qui servent à représenter des phénomènes de valeurs extrêmes.
+<br>
+Une premiere approche consiste a utiliser le fait que la convergence en loi  signifie que la probabilité que la variable aleatoire limite appartienne à un certain intervalle est très similaire à la probabilité que $V_{(n)}$ soit dans cet intervalle pour n suffisamment grand et essayer d approcher $p$ comme suit
+ ${p=E(1_{(V_{(n)}-0.5 \cdot log(n)\geq t-0.5\log(n))} )\approx E(1_{(X\geq t-0.5\log(n))} )=\tilde{p}}$ ou $X$ $\sim$ $Gumbel(\mu,\beta)$
+
+```{r}
+set.seed(0)
+n<-1000
+m<-r.gumbel(10000,loc=0,sca=0.5)#generer un echantillon de taille 10000 d'une loi gumbel (0,0.5)
+p.gum.tilde<-MC.estim(m>=(8-0.5*log(n)))
+paste("Pour un echantillon de taille 10000 Valeur estimee de p.tilde =",p.gum.tilde$val[1])
+paste("Pour un echantillon de taille 10000 Intervalle de confiance a 95%IC=[",p.gum.tilde$binf[taille],",",p.gum.tilde$bsup[taille],"]")
+plt125<-ggplot(data = p.gum.tilde)+
+        geom_line(aes(x=1:length(p.gum.tilde$value),y=p.gum.tilde$value ),color='darkred',alpha=1)+
+        geom_line(aes(x=1:length(p.gum.tilde$value),y=p.gum.tilde$binf),color='red',alpha=0.8) +
+        geom_line(aes(x=1:length(p.gum.tilde$value),y=p.gum.tilde$bsup),color='pink',alpha=0.8)+
+        theme_gray()+
+        labs( x = "Taille de l`echantillon", y = "valeur de p.tilde",title ="")
+plt125
+```
+
+<br>Deuxieme approche:
+<br> On note $f$ la densité de de $V_{(n)}$
+<br>
+<br> $p=P(V_{(n)}\geq t)$  = $\int_{t}^{+\infty}f(x) dx =\int_{\mathbb{R}}f(x)1\!\!1_{\{x\geq t\}}dx$*
+<br>
+<br> Posons $H(x)=1\!\!1_{\{x\geq t\}}$
+<br>
+<br>$p=I=\mathbb{E}(H(X))$ avec $X$ est une variable aléatoire de densité $f$
+<br>
+<br> L'idée principale de l'échantillonnage préférentiel est de remplacer dans la simulation la densité uniforme (qu'on a utilisé dans la Méthode de Monté Carlo classique dans la question précédente ), par une densité alternative , noté $g$ qui tente d'imiter la fonction $f$.
+<br>
+<br>On obtient ainsi l'estimateur de p:
+<br>
+<br> $I =\mathbb{E}(H(X))=\int_{\mathbb{R}}H(x)\frac{f(x)}{g(x)}\ g(x)dx=\mathbb{E}(W(Y))$
+<br>
+<br> où $Y$ est une variable aléatoire de densité $g$
+<br>
+<br> et $W(y)=H(y)\frac{f(y)}{g(y)}$
+<br>
+<br>On a $V_{(n)}$ converge en loi vers $X$ qui suit une loi de Gumbel$(0,\frac{1}{2})$ 
+<br> $\begin{aligned}p&=\mathbb{E}(1_{V_{(n)}\geq t-0.5log(n)})\\&=\int_{\mathbb{R}}1_{(x\geq t-0.5\cdot log(n))}f_{V_{(n)}}(x)\frac{g(x)}{g(x)}dx \end{aligned}$
+<br>
+<br> En effectuant le changement de variable $y=x+0.5 \cdot log(n)$, on obtient 
+<br>
+<br> $p=\int_{\mathbb{R}}1_{y\geq t}\frac{f_{X(n)}(y-0.5log(n))}{g(y-0.5log(n))}g(y-0.5log(n))dx$
+<br>
+<br> Or si $X$ admet pour densité $f$ alors $Y=aX+b$ admet pour densité $f_{Y}=\frac{1}{a}f_{X}(\frac{t-b}{a})$
+<br>
+<br> Donc La densite instrumentale $g\sim Gumbel(0.5 \cdot log(n),0.5)$
+<br>
+<br> Passons au calcul de notre estimateur , pour cela calculons de densité de f de $V(n)$:
+<br> On a $F_{V_{(n)}}(t)=(P(V_{1} \leq t))^n=(1-\exp(-2t))^n 1\!\!1_{t\geq 0}$
+<br>
+<br> par passage à la dérivée :
+<br>
+<br><br> $\begin{aligned} f ( x ) & = n f ( x ) \left( F _ { V _{1}} ( x ) \right) ^ { n - 1 } \\ & = 2 n \exp (- 2 x ) ( 1 - \exp ( - 2 x ) ) ^ { n - 1 } \end{aligned}$
+
+<br>$\hat { I } _ { K} = \frac { n } { K } \sum _ { k = 1} ^ { K } 1_{(X_{k}>t)}\frac{ \exp (- 2 X_{k} ) ( 1 - \exp ( - 2 X_{k} ) ) ^ { n - 1 }}{\exp{(\exp(-2(X_{k}-0.5log(n))))\exp(-2(X_{k}-0.5log(n)))}}$
+<br> ou $X_{k}$ i.i.d $g\sim Gumbel(0.5 \cdot log(n),0.5)$
+```{r}
+set.seed(666)
+MC.import.1<-function(density,h,x){#retourne 
+  n<-1000
+  v<-h(x)*density(x)/d.gumbel(x,loc=0.5*log(n),sca=0.5)
+  return(v)
+}
+
+h<-function(x,t=8,n=1000){
+  return(as.numeric(x>=t))
+}
+
+Y.density.2<- function(x,n=1000) {
+  y<-2*n*exp(-2*x)*(1-(exp(-2*x)))^(n-1)
+  
+  return(y)
+}
+
+n=1000
+mimp<-r.gumbel(10000,loc=0.5*log(n),sca=0.5)
+import.sample.1<-MC.estim(MC.import.1(Y.density.2,h,mimp))
+import.sample.1$val[1]
+paste("Pour un echantillon de taille 10000 Valeur estimee de p.tilde =",import.sample.1$val[1])
+```
+<br> <u>Autrement</u> : On peut aussi  prendre  comme loi d'importance la loi exponentielle de paramètre 1 :
+<br> $\begin{aligned} p&=\mathbb{E}( 1\!\!1_{V_{(n)}\geq t})\\&=2n\int _ { t } ^ { + \infty } \exp ( - 2 x ) ( 1 - \exp ( - 2 x ) ) ^ { n - 1 } d x\\&=2n\int _ { t } ^ { + \infty } \exp ( - 2 x )\exp ( - 2 ( x - t ) )\exp (  2 ( x - t ) ) ( 1 - \exp ( - 2 x ) ) ^ { n - 1 } d x\\&=n \int _ { 1 } ^ { + \infty } 2 \exp ( - 2 ( x - t ) ) \exp ( - 2t ) ( 1 - \operatorname { exp } ( - 2 x ) ) d x\end{aligned}$
+<br>
+<br> On effectue le changement de variable  $y=2(x-t)$
+<br>on a:
+<br>$\begin{aligned}p &= \int _ { 0 } ^ { + \infty } n \exp ( - 2 t ) \exp ( y ) ( 1 - \exp ( - ( y + 2 t ) )^{n}dy \\&=\mathbb { E } \left( n \exp ( - 2 t ) ( 1 - \exp ( - ( Y + 2 t ) )  ^ { n - 1 } ))\right.\end{aligned}$ avec $Y$ suit la loi exponentielle de paramètre 1 .
+<br>
+<br> Ainsi notre nouvel estimateur est le suivant :
+<br>
+<br>$\hat { \delta } _ { K } = \frac { n } { K } \sum _ { k = 1 } ^ { K }  e ^ { - 2 t } \left( 1 - e ^ { \left( Y _ { k } + 2 t \right) } \right) ^ { n - 1 }$
+<br>
+<br> Avec $(Y_{k})_{1\leq k \leq n}$ est une suite de variables aléatoires indépendantes identiquement distribuées selon une loi exponentielle de parametre 1.
+<br>
+```{r}
+MC.import.est<-function(density,h,x){#retourne 
+  n<-length(x)
+  v<-h(x)*density(x)/d.gumbel(x,loc=0.5*log(n),sca=0.5)
+  delta.import<-MC.estim(v)
+  return(MC.estim)
+}
+
+h<-function(x,t=8,n=1000){
+  return(as.numeric(x>=8))
+}
+
+Y.density.2<- function(x,n=1000) {
+  y<-2*n*exp(-2*x)*(1-(exp(-2*x)))^(n-1)
+  
+  return(y)
+}
+```
+
+
+<br>Quesion 4) a)
+<br>
+<br> Construisons un nouvel estimateur à l'aide de la Méthode de la variable antithétique :
+<br>
+<br> On sait que :
+<br>
+<br>  Si $U \sim U (0,1)$ alors $Y = \frac { - \log ( U ) } { \lambda }$ $Y \sim \mathcal { E } ( \lambda )$ 
+<br>
+<br>Le nouvel estimateur de la méthode antithétique s'écrit de la manière suivante : 
+<br>
+<br>$\hat { \delta } _ { K} ^ { A } = \frac { 1 } { K } \sum _ { k = 1 } ^ { K } \frac { H \left( \mathbf { U } _ { k } \right) + H o A \left( \mathbf { U } _ { k } \right) } { 2 }$
+<br>
+<br> Avec $A(U)= 1-U$ est la variable antithétique 
+<br>
+<br> Ainsi $\begin {aligned} \hat { \delta } _ { K} ^ { A } &= \frac { 1 } { K } \sum _ { k = 1 } ^ { K }n \ \exp(−2t) \frac { \left( 1 - \exp \left( - \left( - \log \left( U _ { k } \right) \right) + 2 t \right) \right) ^ { n - 1 } +\left( 1 - \exp \left( - \left( \log \left( 1 -U _ { k } \right) \right) + 2 t \right) \right) ^ { n - 1 } } { 2 }\\&= \frac { n } { K }\sum _ { k = 1 } ^ { K }  \exp ( - 2 t ) \frac { \left[ \left( 1 - U _ { k } \exp ( - 2 t ) \right) ^ { n - 1 } + \left( 1 - \left( 1 - U _ { k } \right) \exp ( - 2 t ) \right) ^ { n - 1 } \right] } { 2 } \end{aligned}$
+<br>
+<br> 
+<br> Sachant que les fonction qu'on a choisit  $H$ et $H\circ A$ sont de monotonie différente alors $\operatorname { Cov } [ h ( \mathbf { X } ) , h \circ A ( \mathbf { X } ) ] < 0$ et dans ce cas l'estimateur de la méthode de la variable de contôle est plus efficase que la méthode de Monté Carlo classique .
+<br>
+<br>
+<br>
+<hr>
+<br><b> EXERCICE 2 :</b>
+<br>
+<br>Soit  $S$ la variable aleatoire modelisant le nombre de précitations sur un mois.
+<br>
+<br> $S$ suit une loi de Poisson de paramètre $\lambda (=3,7)$
+<br>
+<br>c.a.d $P(S = k)= \frac{\lambda ^k}{k!}\mathrm{e}^{-\lambda}$, $\forall k \in \mathbb{N}$
+<br>
+<br> Soit $X$ la variable aleatoire modelisant la quantité de pluie tombant en 1 mois.
+<br>
+<br>$X = \left\{ \begin{array} { l l } { 0 } & { , \text { si } S = 0 } \\ { \sum _ { s = 1 } ^ { S } Q _ { s } } & { , \text { sinon. } } \end{array} \right.$
+<br> 
+X suit une loi de Poisson composee.
+
+<br> <font color ="Magenta"> <b> <u>Question 1: </b></font></u>
+
+<br> Estimons $\mathbb { P } ( X < 3 )$ par <b> la Méthode de Monté Carlo Classique </b>
+<br>On a:<br> $\begin{aligned} p & = \mathbb { P } ( X < 3 ) \\ & = \mathbb { E } ( 1_{(X<3)} ) \\ & = \mathbb{E }( H ( X ) ) \end{aligned}$
+<br>
+<br> Ainsi $\hat { I } _ { n } = \frac { 1 } { n } \sum _ { k = 1 } ^ { n } 1_{(X_{k}<3)}$
+<br> 
+<br> Ou :
+<br>$X _ { k } ( w ) = \sum _ { s = 0 } ^ { S _ { k } } Q_ { s } ( w )$
+<br>
+
+
+```{r}
+#rcomp.pois une fonction qui permet de generer un echantillon de taille n d une loi de poisson composee 
+#l argument lambda precise le paramtere de la variable poissonienne, par defaut il est pris egal a 3.7 
+rcomp.pois=function(n,lambda=3.7){
+  S=rpois(n,lambda=3.7) #Generer un echantillon de taille n de loi pois(lambda)
+  X=rweibull(sum(S),shape=0.5,scale=2) #Generer un echantillon de taille sum(S) de loi weibull La taille de l'échantillon de Q est aléatoire et elle depend de S
+  J=as.factor(rep(1:n,S))#La structure de donnee factor permet de traiter les valeurs prises par S comme des modalites
+  #La fonction tapply() permet d'appliquer une fonction à un vecteur selon les modalités d'un facteur.
+  s=tapply(X,J,sum)
+  V=as.numeric(s[as.character(1:n)])
+  V[is.na(V)]=0
+  return(data.frame(V,S))
+}
+```
+```{r}
+set.seed(666)#on fixe la graine
+X<-rcomp.pois(1000)
+```
+
+```{r}
+library(ggplot2)
+
+plt<-ggplot(data = X,aes(x=X$S,y=X$V, color=as.factor(X$S)))+
+  geom_point(position = "jitter",alpha=0.9)+
+  theme(legend.position='none')+
+  labs( x = "Le nombre de précipitation S(disperse)", y = " La quantité d’eau Q s ")
+plt
+```
+
+
+```{r}
+#Estimation de p par Monte Carlo Classique
+p.mmc<-mean(X$V<3) 
+p.mmc
+```
+On trouve donc que $\ p\approx 0.262$
+
+
+```{r}
+MC.estim <- function(v, niveau = 0.95) {
+  n <- length(v) ; value <- cumsum(v)/(1:n);moy=mean(v)
+  s2 <- (cumsum(v^2) - (1:n) * (value)^2)/(0:(n- 1)) ; s2 <- s2/(1:n)
+  s2 <- c(0, s2[-1]) 
+  b.IC <- qnorm(0.5 * (niveau + 1)) * sqrt(s2)
+  return(data.frame(value = value,val=moy, var = s2,
+                    binf = value - b.IC, bsup = value + b.IC))
+}
+
+#Estimation de p 
+p.droughts<-MC.estim(X$V<3)
+library(ggplot2)
+#
+plt2<-ggplot(data = p.droughts)+
+  geom_line(aes(x=1:length(p.droughts$value),y=p.droughts$value ),color='darkred',alpha=1)+
+  geom_line(aes(x=1:length(p.droughts$value),y=p.droughts$binf),color='red',alpha=0.8) +
+  geom_line(aes(x=1:length(p.droughts$value),y=p.droughts$bsup),color='pink',alpha=0.8)+
+  theme_gray()+
+  labs( x = "Taille de l`echantillon", y = "p estime",
+        title ="Estimateur M.M.C de p")
+
+plt2
+```
+
+<br> <font color ="Magenta"> <b> <u>Question 2: </b></font></u>
+
+<br>
+<br>Le principe de la méthode de stratiﬁcation est de combiner l’information obtenue sur chaque élément de la partition en utilisant la relation:
+<br>
+<br> $\delta = \mathbb { E } _ { v }  [h (  { X } )]  = \sum _ { k = 1 } ^ { K } \mathbb { P } \left[ \mathbf { Z } \in D _ { k } \right] \mathbb { E } \left[ h ( \mathbf { X } ) | Z \in D _ { k } \right]$
+<br><br> Pour chaque élément $D _ { k }$ de la partition, on considère $\left( \mathrm { X } _ { n } ^ { ( k ) } \right) _ { n \in \mathrm { N } }$ une suite de variables aléatoires $i . i . d$. suivant la loi conditionnelle $\mathscr { L } \left( \mathrm { X } | \mathrm { Z } \in D _ { k } \right) .$ Alors pour $n = n _ { 1 } + \ldots + n _ { K } ,$ on définit l'estimateur stratifié par
+<br><br>
+<br>$\quad \hat { \delta } _ { n } \left( n _ { 1 } , \ldots , n _ { K } \right) = \sum _ { k = 1 } ^ { K } \frac { \mathbb { P } \left[ Z \in D _ { k } \right] } { n _ { k } } \sum _ { i = 1 } ^ { n _ { k } } h \left( \mathrm { x } _ { i } ^ { ( k ) } \right)$
+<br>
+<br>L'allocation est dite proportionnelle lorsque l'allocation pour chaque strate $D _ { k } , k = 1 , \ldots , K ,$
+est proportionnelle a la probabilite d'appartenance a la strate, i.e $q _ { k } = p _ { k }$. Dans ce cas l'estimateur stratifie est noté $\hat { \delta } _ { n } \left( p _ { 1 } , \ldots , p _ { k } \right)$.
+<br>
+<br> En observant le graphique précédent , on remarque que la plupart des realisations de S sont inférieurs à 9 .
+<br>
+<br>Il est donc naturel, vue qu'on est entrain de manipuler une variable de poisson composée, de choisir $S$ comme variable de stratification.
+<br>Conventions Notationnelles :
+<br>
+<br>
+<ul>
+<li>Variable de stratification: la variable aléatoire $S$. </li>
+<li>strates: les eléments $D _ { k }$ de la partition : $(S=0)\cup....\cup(S=8)\cup(S\geq9)$ </li>
+<li>allocation : le choix des nombre de tirages $n _ { 1 } , \ldots , n _ { K }$ que l'on fait pour les lois condition-
+nelles $\mathscr { L } \left( X | Z \in D _ { k } \right) , k = 1 , \ldots , K ,$ sous la contrainte que le nombre toral de simulation est
+$n = n _ { 1 } + \ldots + n _ { K } .$</li>
+</ul>
+<br>
+
+<br>
+<br> On considère la partiton : $(S=0)\cup....\cup(S=8)\cup(S\geq9)$ 
+<br>
+<br> 
+Les difficultes rencontrees en pratique sont les suivantes:
+<br>
+<br>Première difficulté : Les $P_{k}$ ne sont pas entieres et donc le nombre des realisations allouees pour chaque strate n'est pas entier. Mais ce ci n'est pas difficile a corriger.
+<br>
+<br>En effet, pour remédier à celà nous allons donc prendre leurs partie entière  ( dans le code  R nous avons utilisé la fonction floor )
+<br>
+La deuxième difficulté est de savoir simuler dans la strate $(S\geq9)$. Une solution possible est de calculer $q_{9}=\sum _ { s = 1 } ^ { 9}\exp(-\lambda)\frac{\lambda^{s}}{s!}$ puis de tirer suivant $S=F_{\lambda}^{-1}(q_{9}+(1-q_{9})U)$ ou $\displaystyle U \sim U(0,1)$ et $F_{\lambda}$ est la fonction de repartition de $\ Pois(\lambda)$
+<br> <ul>N.B.</ul>Les calculs intermedieres des moyennes pour chaque strate, des variances intra-strates(pour la stratification proportionnelles) ainsi que d'autres informations seront regroupees
+dans un tableau c.f. ci-bas.<b>
+
+```{r}
+n<-1000#Taille de l echantillon
+bins.tot.number<-10 #Nombre de strates a utiliser
+bins<-(1:bins.tot.number)-1 #
+w<-sapply(1:bins.tot.number,FUN = function(x) ((3.7)^(x-1))*exp(-3.7)/factorial(x-1)) # Vecteur des poids alloues a chacune des neuf strates 
+```
+<br>
+```{r}
+#r.pois.cond une fonction qui retourne pour un entier S donne la somme de S Weibul de paramtre d'echelle 2 et de parametre de forme 0.5 
+r.pois.cond<-function(n,t){
+  x<-c()
+  if (t == 0) x<-rep(0,n)#Rien n'est a simuler
+  else for (i in 1:n) {
+    x[i]<-sum(rweibull(t,shape=0.5,scale=2))
+  }
+  return(x)
+}
+moy.strat<-function(x){#retourne un vecteur des estimations stratifiees  
+  l<-c()
+  for (i in x) {
+    y<-mean(i<3)
+    l<-append(l,y)
+  }
+  return(l)
+}
+variance<-function(x){
+  n<-length(x)
+  s2 <- (cumsum(x^2) - (1:n) * (mean(x))^2)/(0:(n - 1))
+  s2 <- c(0, s2[-1])/(1:n)
+  return(list(vari=s2,va<-s2[n]))
+}
+
+var.strat<-function(x){#retourne un vecteur des variances pour chaque strate  
+  l<-c()
+  for (i in x) {
+    n<-length(i)
+    y<-(i<3)
+    z<-var(y)
+    l<-append(l,z)
+  }
+  return(l)
+}
+```
+<br>
+```{r}
+stra.n.prop<-sapply(w,FUN = function(x) floor(x*n)) # Nombres de realisations par strate 
+msg<-as.character(n-sum(stra.n.prop))# Reste donc 10 realisations
+print(c('Reste donc:',msg,'realisations') )
+#On les distribue d'une facon equirepartie sur les dix strates 
+stra.n.prop<-sapply(stra.n.prop, function(x) {return (x+1)}) #ajout d une realisation a chaque strate
+#Pour pouvoir vectoriser  dans le  code, les valeurs prises par $S$ seront considérées artficiellement des facteurs 
+T.prop<-as.factor(rep(0:9,stra.n.prop))
+
+set.seed(666)#On fixe la graine pour assurer la reproductibilite du travail
+e.prop<-c() 
+for (i in 1:10){
+  if (i<10) e.prop<-append(e.prop,r.pois.cond(stra.n.prop[i],i-1))
+  else{
+    t<-qpois(ppois(i-2,lambda = 3.7)+(1-ppois(i-2,lambda = 3.7))*runif(stra.n.prop[i],0,1),lambda = 3.7)
+    t<-sapply(t,function(x) r.pois.cond(1,x))
+    e.prop<-append(e.prop,t)
+  }
+} 
+s.strat.prop<-tapply(e.prop,T.prop, identity)#retoure une liste indexee par les valeurs S=0,..,9
+
+```
+<br>
+```{r}
+resultats <- data.frame(weights=w, Nk=stra.n.prop, Qk=stra.n.prop/1000,sigma_k=var.strat(s.strat.prop),mu_k=moy.strat(s.strat.prop),row.names=c("S=0","S=1","S=2","S=3","S=4","S=5","S=6","S=7","S=8","S>=9"))
+resultats
+
+```
+<br>
+```{r}
+MC.Strat<-function(x,y=w,v){
+  t<-moy.strat(x)
+  u<-var.strat(x)
+  val=sum(t*y)
+  vari<-sum(u*(y^2)/v)
+  return(data.frame(Moyenne=val,Variance=vari)  )
+}
+p.stra.prop<-MC.Strat(s.strat.prop,w,stra.n.prop)
+p.stra.prop
+```
+
+
+<br>
+Question 2.(b)
+Comparaison des deux methodes d'estimation (par stratification proportionnelle et Monte Carlo Classique):
+
+
+```{r}
+p.droughts$var[n]/p.stra.prop$Variance
+```
+
+
+Donc, on voit bien l'estimateur par stratification proportionelle permet de reduire la variance de presque la moitie. Ceci etant il est a noter que le calculs pour la stratification proportionelle ne pas trop importantes ceci justifie qu'il est effectivement benefique d'adopter la methode de stratification proportionelle. 
+
+
+
+<br>
+<br> <font color ="Magenta"> <b> <u>Question 3: </b></font></u>
+<br>Question 3.(a)
+<br>
+
+<br>
+<br> On va donc conditionner par rapport à $S$
+<br> l'estimateur de variance minimal, $\hat { \delta } _ { n } \left( n _ { 1 } ^ { * } , \ldots , n _ { k } ^ { * } \right)$, est obtenu pour l'allocation optimale
+définie pour $k = 1 , \ldots , K$ par
+<br>
+$q _ { k } ^ { \star } = \frac { p _ { k } \sigma _ { k } } { \sum _ { i = 1 } ^ { K } p _ { i } \sigma _ { i } }$
+<br>
+<br>
+$\begin{array} { l } { \text { On alors } } \\ { \qquad \operatorname { Var } \left[ \hat { \delta } _ { n } \left( q _ { 1 } ^ { \star } , \ldots , q _ { k } ^ { \star } \right) \right] = \frac { 1 } { n } \left( \sum _ { k = 1 } ^ { K } p _ { k } \sigma _ { k } \right) ^ { 2 } } \end{array}$
+
+
+<br>Les difficultes rencontrees en pratique sont les suivantes:
+<br>Première difficulté(deja rencontree dans la deuxieme question en stratification proportionnelle) : Les $P_{k}$ ne sont pas entieres et donc le nombre des tirages alloues pour chaque strate n'est pas entier. Mais ceci n'est pas difficile a corriger.
+<br>
+<br>En effet, pour remédier à celà nous allons donc prendre leurs partie entière  ( dans le code  R nous avons utilisé la fonction floor )
+<br>Deuxième difficulté:
+Le choix de l’allocation optimale dépend néanmoins des variances intra-strate $\sigma_{k}$ puisque $q _ { k } ^ { \star } = \frac { p _ { k } \sigma _ { k } } { \sum _ { i = 1 } ^ { K } p _ { i } \sigma _ { i } }$ et peut donc être incalculable en pratique. Une solution est de remplacer la variance $\sigma_{k}$ par un estimateur convergeant évalué sur un premier jeu de simulations indépendant du jeu de simulations utilisé pour calculerl’estimateur stratiﬁé.
+<br>La solution que nous proposons est d'utiliser les variances calculees pour la methode de stratification proportionnelles celles-ci jouant donc le role du vrai $\sigma_{k}$. 
+<br>Troisieme difficulté: Pour certain $k\in{\{1..9}\}$ la valeur$q_{k}$ est nulle , ce qui fait que le nombre de tirages $n_{k}$ correspondants est nul.
+<br> Pour remédier à cela, nous allons remplacer les valeurs nulles de $n_{k}$ par la valeure entière la plus proche de 0 qui n'est autre que 1. Mais avec la valeur 1 on ne peut pas calculer la variance
+<br> On va donc prendre la valeur 2 . Il est a noter que ceci ne change pas le caractère non biaisé de l'estimateur.
+
+
+<br> Remarque :
+<br> on aurait pu ne pas simuler le cas où $S=0$ vue que $\mathbb{P}(S<3)=1$ connue .
+<br> On aurait donc pu faire seulement 2 réalisations de la strat $S=0$ ce qui permetterait de calculer la variance intrastat et de conserver le caractère non biaisé de l'estimateur stratifié 
+
+```{r}
+n<-1000
+temp<-w*var.strat(s.strat.prop)/sum(w*var.strat(s.strat.prop))#
+stra.n.optimal<-sapply(temp,FUN = function(x) floor(x*n)) # Nombres de realisations par strate 
+stra.n.optimal[1]<-2
+stra.n.optimal[9]<-2
+stra.n.optimal[10]<-2
+stra.n.optimal
+T.optimal<-as.factor(rep(0:9,stra.n.optimal))
+e.optimal<-c() 
+for (i in 1:10){
+  if (i<10) e.optimal<-append(e.optimal,r.pois.cond(stra.n.optimal[i],i-1))
+  else{
+    t<-qpois(ppois(i-2,lambda = 3.7)+(1-ppois(i-2,lambda = 3.7))*runif(stra.n.optimal[i],0,1),lambda = 3.7)
+    t<-sapply(t,function(x) r.pois.cond(1,x))
+    e.optimal<-append(e.optimal,t)
+  }
+} 
+s.strat.optimal<-tapply(e.optimal,T.optimal, identity)#retoure une liste indexee par les valeurs S=0,..,9
+
+``` 
+<br>
+```{r}
+resultats <- data.frame(weights=w, Nk=stra.n.optimal, Qk=temp,sigma_k=var.strat(s.strat.optimal),mu_k=moy.strat(s.strat.optimal),row.names=c("S=0","S=1","S=2","S=3","S=4","S=5","S=6","S=7","S=8","S>=9"))
+resultats
+
+```
+
+```{r}
+MC.Strat.optimal<-function(x,y=w,n=1000){
+  t<-moy.strat(x)
+  u<-var.strat(x)
+  val=sum(t*y)
+  vari<-sum(y*u)**2/n
+  return(data.frame(Moyenne=val,Variance=vari) )
+}
+p.stra.opt<-MC.Strat.optimal(s.strat.optimal,w,n)
+p.stra.opt
+```
+
+```{r}
+p.stra.prop$Variance/p.stra.opt$Variance
+```
+
+Comparison
+
+Donc on voit que l'estimateur par la methode de stratification optimale est nettement plus performant par rapport a celui par la methode de stratification proportionnelle comme il permet une reduction de la variance de presque sept fois.
+```{r}
+p.droughts$var[n]/p.stra.opt$Variance
+```
+Donc on voit que la stratification avec allocation optimale permet de reduire la variance de presque 10 fois par rapport a la methode classique comme le montre le resultat fournit ci-haut.
+
